@@ -4,14 +4,14 @@ struct FocusListPage: View {
     let title: String
     private let originalItems: [GroceryItem]
     private let baseReplacements: [[GroceryItem]]
-    let onSavingsChange: (Double, Double) -> Void
+    let onSavingsChange: (Double, Double, Double) -> Void
 
     @State private var items: [GroceryItem]
     @State private var selectedItem: GroceryItem?
 
     private let columns = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)]
 
-    init(title: String, startingItems: [GroceryItem], itemReplacements: [[GroceryItem]], onSavingsChange: @escaping (Double, Double) -> Void) {
+    init(title: String, startingItems: [GroceryItem], itemReplacements: [[GroceryItem]], onSavingsChange: @escaping (Double, Double, Double) -> Void) {
         self.title = title
         self.originalItems = startingItems
         self.baseReplacements = itemReplacements
@@ -36,26 +36,33 @@ struct FocusListPage: View {
         max(0, originalTotalPrice - currentTotalPrice)
     }
 
-    /// For each slot, check if the current item is the cheapest option available in that slot
-    private var cheapestSelectionsCount: Int {
-        guard !items.isEmpty else { return 0 }
+    /// Progress goes from 0 to 1.
+    /// 1.0 means every slot uses its cheapest option.
+    /// 0.0 means every slot uses its most expensive option.
+    private func itemProgress(at index: Int) -> Double {
+        let original = originalItems[index]
+        let options = [original] + baseReplacements[index]
+        let prices = options.map { $0.price }
 
-        return items.indices.reduce(0) { partial, index in
-            let currentPrice = items[index].price
+        guard
+            let minPrice = prices.min(),
+            let maxPrice = prices.max(),
+            maxPrice > minPrice
+        else { return 1 } // Only one price option, already the cheapest
 
-            // All possible options for this slot: original + base replacements
-            let original = originalItems[index]
-            let options = [original] + baseReplacements[index]
-            let minPrice = options.map { $0.price }.min() ?? currentPrice
-
-            return partial + (currentPrice == minPrice ? 1 : 0)
-        }
+        let currentPrice = items[index].price
+        let normalized = (maxPrice - currentPrice) / (maxPrice - minPrice)
+        return min(1, max(0, normalized))
     }
 
-    /// Progress goes from 0 to 1 and is full only when all four items are the cheapest choices
     private var progressValue: Double {
         guard !items.isEmpty else { return 0 }
-        return Double(cheapestSelectionsCount) / Double(items.count)
+
+        let totalProgress = items.indices.reduce(0.0) { partial, index in
+            partial + itemProgress(at: index)
+        }
+
+        return totalProgress / Double(items.count)
     }
 
     private var savingsText: String {
@@ -137,10 +144,10 @@ struct FocusListPage: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .onAppear {
-            onSavingsChange(currentSavings, maxSavings)
+            onSavingsChange(currentSavings, maxSavings, progressValue)
         }
         .onChange(of: items) { _ in
-            onSavingsChange(currentSavings, maxSavings)
+            onSavingsChange(currentSavings, maxSavings, progressValue)
         }
         .sheet(item: $selectedItem) { selected in
             if let index = items.firstIndex(where: { $0.id == selected.id }) {

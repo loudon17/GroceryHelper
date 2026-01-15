@@ -6,74 +6,77 @@ struct FocusListsView: View {
     private let basePresets: [[GroceryItem]] = [
         // Grocery
         [
-            GroceryItem(name: "Coca-Cola", price: 2.50),
+            GroceryItem(name: "Coca-Cola", price: 5.00),
             GroceryItem(name: "Cake", price: 15.00),
-            GroceryItem(name: "Bread", price: 3.50),
-            GroceryItem(name: "Pasta", price: 2.00)
+            GroceryItem(name: "Olives", price: 7.00),
+            GroceryItem(name: "Steak and fries", price: 22.00)
+        ],
+        // school
+        [
+            GroceryItem(name: "New textbook", price: 25.00),
+            GroceryItem(name: "Set of 2 pens", price: 5.00),
+            GroceryItem(name: "Set of 5 crayons", price: 12.00),
+            GroceryItem(name: "Small notebook", price: 7.00)
+        ],
+        // party
+
+        [
+            GroceryItem(name: "Full set of decorations", price: 50.00),
+            GroceryItem(name: "1 candle", price: 5.00),
+            GroceryItem(name: "Mid size cake", price: 30.00),
+            GroceryItem(name: "Champagne", price: 50.00)
         ],
         // Hygiene
         [
-            GroceryItem(name: "Fancy Shampoo", price: 25.00),
-            GroceryItem(name: "Toothbrush", price: 5.00),
-            GroceryItem(name: "Hair Balsam", price: 12.00),
-            GroceryItem(name: "Body Lotion", price: 10.00)
-        ],
-        // Furniture & Appliances
-        [
-            GroceryItem(name: "Chair", price: 85.00),
-            GroceryItem(name: "Fridge", price: 800.00),
-            GroceryItem(name: "Oven", price: 600.00),
-            GroceryItem(name: "Bed", price: 500.00)
-        ],
-        // House Supplies
-        [
-            GroceryItem(name: "Laundry Detergent", price: 14.00),
-            GroceryItem(name: "Scrub Brush", price: 4.00),
-            GroceryItem(name: "Light Bulbs", price: 12.00),
-            GroceryItem(name: "Paper Towels", price: 6.00)
+            GroceryItem(name: "Expensive pads", price: 8.00),
+            GroceryItem(name: "Cheap lipstick", price: 4.00),
+            GroceryItem(name: "Small bottle of perfume", price: 12.00),
+            GroceryItem(name: "Package of 1 body soap", price: 6.00)
         ]
     ]
     
     private let replacementOptions: [[[GroceryItem]]] = [
         // Grocery
         [
-            [GroceryItem(name: "Water", price: 1.50), GroceryItem(name: "Wine", price: 12.00), GroceryItem(name: "Beer", price: 8.00)],  // Coca-Cola
-            [GroceryItem(name: "Fruit", price: 5.00), GroceryItem(name: "Greek Yogurt", price: 6.00), GroceryItem(name: "Dark Chocolate", price: 4.00)],  // Cake
-            [GroceryItem(name: "Rice Cakes", price: 3.00), GroceryItem(name: "Tortilla Wraps", price: 4.00), GroceryItem(name: "Crackers", price: 2.50)],  // Bread
-            [GroceryItem(name: "White Rice", price: 2.50), GroceryItem(name: "Orzo", price: 3.00), GroceryItem(name: "Farro", price: 4.50)]  // Pasta
+            [GroceryItem(name: "Water", price: 1.50), GroceryItem(name: "Wine", price: 12.00)],
+            [GroceryItem(name: "Fruit", price: 5.00), GroceryItem(name: "Dark Chocolate", price: 10.00)],
+            [GroceryItem(name: "Chicken strips", price: 18.00), GroceryItem(name: "Crackers", price: 2.50)],
+            [GroceryItem(name: "White Rice and zucchini", price: 6.50), GroceryItem(name: "Pasta Bolognese", price: 14.50)]
+        ],
+        //school
+        [
+            [GroceryItem(name: "Used textbook", price: 12.00), GroceryItem(name: "Lent textbook", price: 0.00)],
+            [GroceryItem(name: "Set of 6 pens", price: 10.00), GroceryItem(name: "Set of 10 pens", price: 15.00)],
+            [GroceryItem(name: "Set of 20 crayons", price: 25.00), GroceryItem(name: "Set of 10 crayons", price: 15.00)],
+            [GroceryItem(name: "Big notebook", price: 15.00), GroceryItem(name: "Set of 3 notebooks", price: 35.00)]
+        ],
+
+        // party
+        [
+            [GroceryItem(name: "Party hats", price: 20.00), GroceryItem(name: "Confetti", price: 5.00)],
+            [GroceryItem(name: "Set of 5 candles", price: 10.00)],
+            [GroceryItem(name: "Small size cake", price: 15.00), GroceryItem(name: "Big size cake", price: 40.00)],
+            [GroceryItem(name: "Water", price: 1.50), GroceryItem(name: "Fizzy drinks", price: 10.00)]
         ],
         // Hygiene
         [
-            [GroceryItem(name: "Standard Shampoo", price: 8.00), GroceryItem(name: "Dry Shampoo", price: 10.00), GroceryItem(name: "Cleansing Bar", price: 5.00)],  // Fancy Shampoo
-            [GroceryItem(name: "Electric Toothbrush", price: 60.00), GroceryItem(name: "Mouthwash", price: 7.00), GroceryItem(name: "Dental Floss", price: 4.00)],  // Toothbrush
-            [GroceryItem(name: "Hair Mask", price: 15.00), GroceryItem(name: "Argan Oil", price: 18.00), GroceryItem(name: "Leave-in Spray", price: 11.00)],  // Hair Balsam
-            [GroceryItem(name: "Body Butter", price: 15.00), GroceryItem(name: "Coconut Oil", price: 9.00), GroceryItem(name: "Aloe Vera Gel", price: 8.00)]  // Body Lotion
+            [GroceryItem(name: "Built pads", price: 1.00), GroceryItem(name: "Cheap pads", price: 4.00)],
+            [GroceryItem(name: "Expensive lipstick", price: 150.00)],
+            [GroceryItem(name: "Medium bottle of perfume", price: 30.00), GroceryItem(name: "Big bottle of perfume", price: 50.00)],
+            [GroceryItem(name: "Package of 3 body soap", price: 15.00), GroceryItem(name: "Package of 5 body soap", price: 25.00)]
         ],
-        // Furniture & Appliances
-        [
-            [GroceryItem(name: "Stool", price: 45.00), GroceryItem(name: "Bench", price: 120.00), GroceryItem(name: "Armchair", price: 250.00)],  // Chair
-            [GroceryItem(name: "Mini-fridge", price: 150.00), GroceryItem(name: "Chest Freezer", price: 250.00), GroceryItem(name: "Wine Cooler", price: 350.00)],  // Fridge
-            [GroceryItem(name: "Microwave", price: 120.00), GroceryItem(name: "Air Fryer", price: 100.00), GroceryItem(name: "Toaster Oven", price: 80.00)],  // Oven
-            [GroceryItem(name: "Sofa Bed", price: 450.00), GroceryItem(name: "Futon", price: 200.00), GroceryItem(name: "Daybed", price: 350.00)]  // Bed
-        ],
-        // House Supplies
-        [
-            [GroceryItem(name: "Soap Flakes", price: 8.00), GroceryItem(name: "Baking Soda & Vinegar", price: 5.00), GroceryItem(name: "Detergent Pods", price: 18.00)],  // Laundry Detergent
-            [GroceryItem(name: "Sponge", price: 2.00), GroceryItem(name: "Microfiber Cloth", price: 3.00), GroceryItem(name: "Steel Wool", price: 5.00)],  // Scrub Brush
-            [GroceryItem(name: "LED Bulbs", price: 15.00), GroceryItem(name: "Smart Bulbs", price: 35.00), GroceryItem(name: "Halogen Lamps", price: 10.00)],  // Light Bulbs
-            [GroceryItem(name: "Dish Towels", price: 12.00), GroceryItem(name: "Reusable Rags", price: 10.00), GroceryItem(name: "Newspaper", price: 2.00)]  // Paper Towels
-        ]
     ]
 
     private let titles = [
         "Grocery",
+        "School",
+        "Party",
         "Hygiene",
-        "Furniture & Appliances",
-        "House Supplies"
     ]
 
     @State private var listCurrentSavings: [Double] = Array(repeating: 0, count: 4)
     @State private var listMaxSavings: [Double] = Array(repeating: 0, count: 4)
+    @State private var listProgress: [Double] = Array(repeating: 0, count: 4)
 
     private var totalCurrentSavings: Double {
         listCurrentSavings.reduce(0, +)
@@ -84,8 +87,9 @@ struct FocusListsView: View {
     }
 
     private var totalSavingsProgress: Double {
-        guard totalMaxSavings > 0 else { return 0 }
-        return min(1, max(0, totalCurrentSavings / totalMaxSavings))
+        guard !listProgress.isEmpty else { return 0 }
+        let combinedProgress = listProgress.reduce(0, +)
+        return min(1, max(0, combinedProgress / Double(listProgress.count)))
     }
 
     private var totalSavingsText: String {
@@ -109,9 +113,10 @@ struct FocusListsView: View {
                             title: titles[index],
                             startingItems: basePresets[index],
                             itemReplacements: replacementOptions[index],
-                            onSavingsChange: { current, max in
+                            onSavingsChange: { current, max, progress in
                                 listCurrentSavings[index] = current
                                 listMaxSavings[index] = max
+                                listProgress[index] = progress
                             }
                         )
                         .tag(index)
@@ -159,7 +164,7 @@ struct FocusListsView: View {
                             .foregroundStyle(.secondary)
 
                         Button {
-                            if currentPage < 4 {
+                            if currentPage < 4{
                                 withAnimation {
                                     currentPage += 1
                                 }
@@ -184,7 +189,7 @@ struct FocusListsView: View {
                 .padding(.bottom, 30)
             }
         }
-        .navigationTitle(currentPage < 4 ? titles[currentPage] : "Summary")
+        .navigationTitle(currentPage < 3 ? titles[currentPage] : "Summary")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
