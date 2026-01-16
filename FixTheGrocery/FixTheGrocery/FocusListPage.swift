@@ -118,6 +118,11 @@ struct FocusListPage: View {
                             selectedItem = items[index]
                         } label: {
                             VStack(spacing: 8) {
+                                Image(items[index].name)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 80, height: 80)
+                                    .cornerRadius(8)
                                 Text(items[index].name)
                                     .font(.system(size: 20, weight: .semibold))
                                     .lineLimit(2)

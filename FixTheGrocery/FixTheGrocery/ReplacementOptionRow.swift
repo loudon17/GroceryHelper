@@ -34,6 +34,12 @@ struct ReplacementOptionRow: View {
             onSelect(option)
         } label: {
             HStack(spacing: 20) {
+                Image(option.name)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 60, height: 60)
+                    .cornerRadius(8)
+                
                 VStack(alignment: .leading, spacing: 8) {
                     Text(option.name)
                         .font(.system(size: 22, weight: .semibold))
