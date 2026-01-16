@@ -36,23 +36,57 @@ struct FocusListPage: View {
         max(0, originalTotalPrice - currentTotalPrice)
     }
 
-    /// Progress goes from 0 to 1.
-    /// 1.0 means every slot uses its cheapest option.
-    /// 0.0 means every slot uses its most expensive option.
+    /// Progress goes from -1.0 to 1.0.
+    /// 0.0 means the current price equals the original price.
+    /// 1.0 means the current price is the cheapest possible (min).
+    /// -1.0 means the current price is the most expensive possible (max).
     private func itemProgress(at index: Int) -> Double {
         let original = originalItems[index]
+        let originalPrice = original.price
+        let currentPrice = items[index].price
         let options = [original] + baseReplacements[index]
         let prices = options.map { $0.price }
 
         guard
             let minPrice = prices.min(),
-            let maxPrice = prices.max(),
-            maxPrice > minPrice
-        else { return 1 } // Only one price option, already the cheapest
+            let maxPrice = prices.max()
+        else { return 0 } // Only one price option, equals original
 
-        let currentPrice = items[index].price
-        let normalized = (maxPrice - currentPrice) / (maxPrice - minPrice)
-        return min(1, max(0, normalized))
+        let delta = originalPrice - currentPrice
+
+        // Positive delta: savings (current < original)
+        if delta > 0 {
+            let savingsRange = originalPrice - minPrice
+            guard savingsRange > 0 else { 
+                // Original is already the min, but current is even cheaper (shouldn't happen)
+                return currentPrice < originalPrice ? 1.0 : 0.0
+            }
+            let normalized = delta / savingsRange
+            return min(1.0, max(0.0, normalized))
+        }
+        // Negative delta: extra cost (current > original)
+        else if delta < 0 {
+            let extraCostRange = maxPrice - originalPrice
+            guard extraCostRange > 0 else { 
+                // Original is already the max, but current is even more expensive (shouldn't happen)
+                return currentPrice > originalPrice ? -1.0 : 0.0
+            }
+            let normalized = delta / extraCostRange
+            return max(-1.0, min(0.0, normalized))
+        }
+        // delta == 0: current equals original
+        else {
+            // If original equals max, return -1.0 (we're at most expensive)
+            if originalPrice == maxPrice {
+                return -1.0
+            }
+            // If original equals min, return 1.0 (we're at cheapest)
+            if originalPrice == minPrice {
+                return 1.0
+            }
+            // Otherwise, return 0.0 (we're at original, which is somewhere in between)
+            return 0.0
+        }
     }
 
     private var progressValue: Double {
@@ -103,8 +137,8 @@ struct FocusListPage: View {
                 Text("\(title) savings")
                     .font(.headline)
 
-                ProgressView(value: progressValue)
-                    .tint(.green)
+                BiDirectionalProgressBar(value: progressValue)
+                    .frame(maxWidth: .infinity)
 
                 Text(savingsText)
                     .font(.subheadline)
