@@ -8,14 +8,16 @@ struct IntroView: View {
 
             VStack(spacing: 100) {
                 HStack(spacing: 60) {
+                    // Immagine del personaggio
                     Image("Group 118")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 300, height: 300)
                         .shadow(radius: 12)
 
+                    // Testo aggiornato: Più focus sul risparmio e meno sul "goal" generico
                     Text("""
-                    "Hey, it's me. help me fix my grocery, i am out of focus in the latest days and I need help in reaching my goal."
+                    "Hey! I've lost track of my spending lately. Can you help me spot the best savings opportunities to fix my budget?"
                     """)
                     .multilineTextAlignment(.center)
                     .font(.system(size: 24, weight: .semibold))
@@ -37,10 +39,10 @@ struct IntroView: View {
                     FocusListsView()
                 } label: {
                     HStack(spacing: 12) {
+                        Text("Let's Start") // Testo del pulsante più invitante
+                            .font(.system(size: 20, weight: .semibold))
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.system(size: 28))
-                        Text("Next")
-                            .font(.system(size: 20, weight: .semibold))
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 14)
@@ -49,7 +51,7 @@ struct IntroView: View {
                             .fill(Color.accentColor.opacity(0.15))
                     )
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .trailing) // Spostato a destra per seguire il flusso naturale
             }
             .padding(40)
         }

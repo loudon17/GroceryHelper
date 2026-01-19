@@ -19,76 +19,65 @@ struct FocusListPage: View {
         self._items = State(initialValue: startingItems)
     }
 
-    // MARK: - Progress & savings
+    // MARK: - Price & Savings Logic
 
-    /// Total you spend with the original items in this focus list
     private var originalTotalPrice: Double {
         originalItems.reduce(0) { $0 + $1.price }
     }
 
-    /// Total you spend with the current choices
     private var currentTotalPrice: Double {
         items.reduce(0) { $0 + $1.price }
     }
 
-    /// How much you are currently saving compared to the original list (never negative)
-    private var currentSavings: Double {
-        max(0, originalTotalPrice - currentTotalPrice)
-    }
-
-    /// Progress goes from 0 to 1.
-    /// 1.0 means every slot uses its cheapest option.
-    /// 0.0 means every slot uses its most expensive option.
-    private func itemProgress(at index: Int) -> Double {
-        let original = originalItems[index]
-        let options = [original] + baseReplacements[index]
-        let prices = options.map { $0.price }
-
-        guard
-            let minPrice = prices.min(),
-            let maxPrice = prices.max(),
-            maxPrice > minPrice
-        else { return 1 } // Only one price option, already the cheapest
-
-        let currentPrice = items[index].price
-        let normalized = (maxPrice - currentPrice) / (maxPrice - minPrice)
-        return min(1, max(0, normalized))
+    private var priceDifference: Double {
+        originalTotalPrice - currentTotalPrice
     }
 
     private var progressValue: Double {
         guard !items.isEmpty else { return 0 }
-
         let totalProgress = items.indices.reduce(0.0) { partial, index in
-            partial + itemProgress(at: index)
-        }
+            let original = originalItems[index]
+            let options = [original] + baseReplacements[index]
+            let prices = options.map { $0.price }
 
+            guard let minPrice = prices.min(), let maxPrice = prices.max(), maxPrice > minPrice else { return partial + 1 }
+
+            let currentPrice = items[index].price
+            let normalized = (maxPrice - currentPrice) / (maxPrice - minPrice)
+            return partial + min(1, max(0, normalized))
+        }
         return totalProgress / Double(items.count)
     }
 
-    private var savingsText: String {
-        if currentSavings <= 0 {
-            return "No savings yet. Try swapping to cheaper options."
+    private var summaryText: String {
+        let diff = priceDifference
+        if diff > 0 {
+            return "You are saving \(String(format: "$%.2f", diff))"
+        } else if diff < 0 {
+            return "You are spending \(String(format: "$%.2f", abs(diff))) more"
         } else {
-            return "You are saving \(String(format: "$%.2f", currentSavings)) on this list."
+            return "Same cost as the starting list"
         }
     }
 
-    /// Maximum possible savings for this list if you pick the cheapest option in every slot
+    private var summaryColor: Color {
+        let diff = priceDifference
+        if diff > 0 { return .green }
+        if diff < 0 { return .red }
+        return .secondary
+    }
+
     private var maxSavings: Double {
         guard !items.isEmpty else { return 0 }
-
         let minTotal = items.indices.reduce(0.0) { partial, index in
             let original = originalItems[index]
             let options = [original] + baseReplacements[index]
             let minPrice = options.map { $0.price }.min() ?? original.price
             return partial + minPrice
         }
-
         return max(0, originalTotalPrice - minTotal)
     }
 
-    // Replacement options for a specific slot, computed dynamically so the
-    // previous choice always goes back into the list and the current choice is removed.
     private func replacementOptions(for index: Int) -> [GroceryItem] {
         let original = originalItems[index]
         let options = [original] + baseReplacements[index]
@@ -98,18 +87,30 @@ struct FocusListPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 30) {
-            // Progress bar / savings header instead of image
-            VStack(alignment: .leading, spacing: 12) {
-                Text("\(title) savings")
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
                     .font(.headline)
 
-                ProgressView(value: progressValue)
-                    .tint(.green)
+                HStack {
+                    Text("Initial Cost:")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
 
-                Text(savingsText)
+                    Text(String(format: "$%.2f", originalTotalPrice))
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                }
+
+                Text(summaryText)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(summaryColor)
+                    .contentTransition(.numericText(value: priceDifference))
+                    .animation(.snappy, value: priceDifference)
             }
+            .padding(.top, 10)
 
             HStack(alignment: .top, spacing: 40) {
                 LazyVGrid(columns: columns, spacing: 20) {
@@ -148,11 +149,12 @@ struct FocusListPage: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        // MODIFICA IMPORTANTE QUI SOTTO: rimosso max(0, ...) per passare anche valori negativi
         .onAppear {
-            onSavingsChange(currentSavings, maxSavings, progressValue)
+            onSavingsChange(priceDifference, maxSavings, progressValue)
         }
         .onChange(of: items) { _ in
-            onSavingsChange(currentSavings, maxSavings, progressValue)
+            onSavingsChange(priceDifference, maxSavings, progressValue)
         }
         .sheet(item: $selectedItem) { selected in
             if let index = items.firstIndex(where: { $0.id == selected.id }) {

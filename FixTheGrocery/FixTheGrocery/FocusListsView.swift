@@ -19,7 +19,6 @@ struct FocusListsView: View {
             GroceryItem(name: "Small notebook", price: 7.00)
         ],
         // party
-
         [
             GroceryItem(name: "Full set of decorations", price: 50.00),
             GroceryItem(name: "1 candle", price: 5.00),
@@ -34,7 +33,7 @@ struct FocusListsView: View {
             GroceryItem(name: "Package of 1 body soap", price: 6.00)
         ]
     ]
-    
+
     private let replacementOptions: [[[GroceryItem]]] = [
         // Grocery
         [
@@ -43,14 +42,13 @@ struct FocusListsView: View {
             [GroceryItem(name: "Chicken strips", price: 18.00), GroceryItem(name: "Crackers", price: 2.50)],
             [GroceryItem(name: "White Rice and zucchini", price: 6.50), GroceryItem(name: "Pasta Bolognese", price: 14.50)]
         ],
-        //school
+        // school
         [
             [GroceryItem(name: "Used textbook", price: 12.00), GroceryItem(name: "Lent textbook", price: 0.00)],
             [GroceryItem(name: "Set of 6 pens", price: 10.00), GroceryItem(name: "Set of 10 pens", price: 15.00)],
             [GroceryItem(name: "Set of 20 crayons", price: 25.00), GroceryItem(name: "Set of 10 crayons", price: 15.00)],
             [GroceryItem(name: "Big notebook", price: 15.00), GroceryItem(name: "Set of 3 notebooks", price: 35.00)]
         ],
-
         // party
         [
             [GroceryItem(name: "Party hats", price: 20.00), GroceryItem(name: "Confetti", price: 5.00)],
@@ -78,33 +76,21 @@ struct FocusListsView: View {
     @State private var listMaxSavings: [Double] = Array(repeating: 0, count: 4)
     @State private var listProgress: [Double] = Array(repeating: 0, count: 4)
 
-    private var totalCurrentSavings: Double {
+    // Somma di tutte le differenze (positivo = risparmio, negativo = spesa extra)
+    private var totalDifference: Double {
         listCurrentSavings.reduce(0, +)
     }
 
-    private var totalMaxSavings: Double {
-        listMaxSavings.reduce(0, +)
-    }
-
-    private var totalSavingsProgress: Double {
-        guard !listProgress.isEmpty else { return 0 }
-        let combinedProgress = listProgress.reduce(0, +)
-        return min(1, max(0, combinedProgress / Double(listProgress.count)))
-    }
-
-    private var totalSavingsText: String {
-        if totalCurrentSavings <= 0 {
-            return "We haven't saved anything yet, but we're just getting started."
-        } else {
-            return "Together we saved \(String(format: "$%.2f", totalCurrentSavings)) across all lists!"
-        }
+    // Calcolo del costo totale iniziale (base fissa)
+    private var totalInitialCost: Double {
+        basePresets.flatMap { $0 }.reduce(0) { $0 + $1.price }
     }
 
     var body: some View {
         ZStack {
             Color(.systemBackground)
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 TabView(selection: $currentPage) {
                     // Four focus lists (0...3)
@@ -113,8 +99,9 @@ struct FocusListsView: View {
                             title: titles[index],
                             startingItems: basePresets[index],
                             itemReplacements: replacementOptions[index],
-                            onSavingsChange: { current, max, progress in
-                                listCurrentSavings[index] = current
+                            onSavingsChange: { currentDiff, max, progress in
+                                // currentDiff ora può essere positivo o negativo
+                                listCurrentSavings[index] = currentDiff
                                 listMaxSavings[index] = max
                                 listProgress[index] = progress
                             }
@@ -126,15 +113,16 @@ struct FocusListsView: View {
 
                     // Final summary page (index 4)
                     TotalSavingsSummaryView(
-                        totalSavingsText: totalSavingsText,
-                        totalSavingsProgress: totalSavingsProgress
+                        initialCost: totalInitialCost,
+                        totalDifference: totalDifference
                     )
                     .tag(4)
                     .padding(.horizontal, 40)
                     .padding(.vertical, 20)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                
+
+                // Navigation controls
                 VStack(spacing: 24) {
                     HStack(spacing: 20) {
                         Button {
@@ -164,7 +152,7 @@ struct FocusListsView: View {
                             .foregroundStyle(.secondary)
 
                         Button {
-                            if currentPage < 4{
+                            if currentPage < 4 {
                                 withAnimation {
                                     currentPage += 1
                                 }
@@ -189,43 +177,73 @@ struct FocusListsView: View {
                 .padding(.bottom, 30)
             }
         }
-        .navigationTitle(currentPage < 3 ? titles[currentPage] : "Summary")
+        .navigationTitle(currentPage < 4 ? titles[currentPage] : "Summary")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
+// MARK: - Summary View Aggiornata
 private struct TotalSavingsSummaryView: View {
-    let totalSavingsText: String
-    let totalSavingsProgress: Double
+    let initialCost: Double
+    let totalDifference: Double
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            HStack(alignment: .center, spacing: 20) {
-                Image("Group 118")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 140, height: 140)
-                    .shadow(radius: 10)
+        VStack(spacing: 30) {
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Thank you for the help!")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                    Text(totalSavingsText)
-                        .font(.subheadline)
+            Image("Group 118") // Asset immagine esistente
+                .resizable()
+                .scaledToFit()
+                .frame(width: 160, height: 160)
+                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+
+            Text("All Lists Completed!")
+                .font(.title)
+                .fontWeight(.bold)
+
+            // CARD DEI TOTALI
+            VStack(spacing: 24) {
+
+                // 1. Costo Iniziale Totale
+                VStack(spacing: 8) {
+                    Text("Total Initial Cost")
+                        .font(.headline)
                         .foregroundStyle(.secondary)
+
+                    Text(String(format: "$%.2f", initialCost))
+                        .font(.system(size: 40, weight: .bold)) // Molto grande e chiaro
+                        .foregroundStyle(.primary)
                 }
 
-                Spacer()
-            }
+                Divider()
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Total savings progress")
-                    .font(.headline)
-
-                ProgressView(value: totalSavingsProgress)
-                    .tint(.green)
+                // 2. Risparmio o Spesa Extra
+                VStack(spacing: 8) {
+                    if totalDifference > 0 {
+                        Text("Total Saved")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                        Text(String(format: "-$%.2f", totalDifference))
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundStyle(.green)
+                    } else if totalDifference < 0 {
+                        Text("Extra Cost")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                        Text(String(format: "+$%.2f", abs(totalDifference)))
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundStyle(.red)
+                    } else {
+                        Text("No Cost Change")
+                            .font(.title2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
+            .padding(30)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color(.secondarySystemBackground))
+            )
 
             Spacer()
         }
