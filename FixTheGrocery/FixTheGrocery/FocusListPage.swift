@@ -88,30 +88,63 @@ struct FocusListPage: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 30) {
 
-            VStack(alignment: .leading, spacing: 8) {
+            // MARK: - HEADER AGGIORNATO
+            VStack(alignment: .leading, spacing: 16) {
                 Text(title)
                     .font(.headline)
 
-                HStack {
-                    Text("Initial Cost:")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                // BOX COSTI AFFIANCATI
+                HStack(spacing: 40) {
 
-                    Text(String(format: "$%.2f", originalTotalPrice))
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.primary)
+                    // 1. Costo Iniziale
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Initial Cost")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.secondary)
+
+                        Text(String(format: "$%.2f", originalTotalPrice))
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.primary)
+                    }
+
+                    Divider()
+                        .frame(height: 40)
+
+                    // 2. Costo Aggiornato
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Updated Cost")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.secondary)
+
+                        Text(String(format: "$%.2f", currentTotalPrice))
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            // Colore dinamico: Verde (risparmio) o Rosso (spesa extra)
+                            .foregroundStyle(priceDifference >= 0 ? .green : .red)
+                            .contentTransition(.numericText(value: currentTotalPrice))
+                            .animation(.snappy, value: currentTotalPrice)
+                    }
                 }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color(.secondarySystemBackground))
+                )
 
+                // Testo descrittivo sotto (es: "You are saving $5.00")
                 Text(summaryText)
                     .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .fontWeight(.medium)
                     .foregroundStyle(summaryColor)
                     .contentTransition(.numericText(value: priceDifference))
                     .animation(.snappy, value: priceDifference)
             }
             .padding(.top, 10)
 
+            // MARK: - GRID ITEMS
             HStack(alignment: .top, spacing: 40) {
                 LazyVGrid(columns: columns, spacing: 20) {
                     ForEach(items.indices, id: \.self) { index in
@@ -128,19 +161,24 @@ struct FocusListPage: View {
                                     .font(.system(size: 20, weight: .semibold))
                                     .lineLimit(2)
                                     .multilineTextAlignment(.center)
+                                    .foregroundStyle(.black)
                                 Text(items[index].formattedPrice)
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.gray)
                                 Image(systemName: "arrow.triangle.2.circlepath")
                                     .font(.title3)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(.orange)
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 140)
                             .padding()
                             .background(
                                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                    .fill(Color(.secondarySystemBackground))
+                                    .fill(Color.white)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                    .strokeBorder(Color.orange, lineWidth: 2)
                             )
                         }
                     }
@@ -149,7 +187,6 @@ struct FocusListPage: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        // MODIFICA IMPORTANTE QUI SOTTO: rimosso max(0, ...) per passare anche valori negativi
         .onAppear {
             onSavingsChange(priceDifference, maxSavings, progressValue)
         }

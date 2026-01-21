@@ -1,10 +1,3 @@
-//
-//  GroceryCardView.swift
-//  FixTheGrocery
-//
-//  Created by AI Assistant on 12/01/26.
-//
-
 import SwiftUI
 
 struct GroceryCardView: View {
@@ -35,14 +28,20 @@ struct GroceryCardView: View {
                     HStack {
                         Text(items[index])
                             .font(.body.weight(.medium))
+                            .foregroundStyle(.black)
                         Spacer()
                         Image(systemName: "arrow.triangle.2.circlepath")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.orange)
                     }
                     .padding()
+                    // MODIFICA QUI
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color(.secondarySystemBackground))
+                            .fill(Color.white)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .strokeBorder(Color.orange, lineWidth: 2)
                     )
                 }
             }
@@ -60,12 +59,3 @@ struct GroceryCardView: View {
         )
     }
 }
-
-#Preview {
-    GroceryCardView(
-        title: "Sample List",
-        startingItems: ["Apples", "Milk", "Bread", "Rice"],
-        replacementOptions: ["Bananas", "Yogurt", "Pasta"]
-    )
-}
-

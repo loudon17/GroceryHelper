@@ -9,7 +9,7 @@ struct FocusListsView: View {
             GroceryItem(name: "Coca-Cola", price: 5.00),
             GroceryItem(name: "Cake", price: 15.00),
             GroceryItem(name: "Olives", price: 7.00),
-            GroceryItem(name: "Steak and fries", price: 22.00)
+            GroceryItem(name: "Burger", price: 22.00)
         ],
         // school
         [
@@ -39,7 +39,7 @@ struct FocusListsView: View {
         [
             [GroceryItem(name: "Water", price: 1.50), GroceryItem(name: "Wine", price: 12.00)],
             [GroceryItem(name: "Fruit", price: 5.00), GroceryItem(name: "Dark Chocolate", price: 10.00)],
-            [GroceryItem(name: "Chicken strips", price: 18.00), GroceryItem(name: "Crackers", price: 2.50)],
+            [GroceryItem(name: "Fancy appetizers", price: 18.00), GroceryItem(name: "Crackers", price: 2.50)],
             [GroceryItem(name: "White Rice and zucchini", price: 6.50), GroceryItem(name: "Pasta Bolognese", price: 14.50)]
         ],
         // school
@@ -59,7 +59,7 @@ struct FocusListsView: View {
         // Hygiene
         [
             [GroceryItem(name: "Built pads", price: 1.00), GroceryItem(name: "Cheap pads", price: 4.00)],
-            [GroceryItem(name: "Expensive lipstick", price: 150.00)],
+            [GroceryItem(name: "Expensive lipstick", price: 20.00)],
             [GroceryItem(name: "Medium bottle of perfume", price: 30.00), GroceryItem(name: "Big bottle of perfume", price: 50.00)],
             [GroceryItem(name: "Package of 3 body soap", price: 15.00), GroceryItem(name: "Package of 5 body soap", price: 25.00)]
         ],
@@ -187,10 +187,15 @@ private struct TotalSavingsSummaryView: View {
     let initialCost: Double
     let totalDifference: Double
 
+    // Calcolo dinamico del costo finale totale
+    private var finalCost: Double {
+        initialCost - totalDifference
+    }
+
     var body: some View {
         VStack(spacing: 30) {
 
-            Image("Group 118") // Asset immagine esistente
+            Image("WomanHappy") // Asset immagine esistente
                 .resizable()
                 .scaledToFit()
                 .frame(width: 160, height: 160)
@@ -203,40 +208,54 @@ private struct TotalSavingsSummaryView: View {
             // CARD DEI TOTALI
             VStack(spacing: 24) {
 
-                // 1. Costo Iniziale Totale
-                VStack(spacing: 8) {
-                    Text("Total Initial Cost")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
+                // HSTACK: Initial Cost vs Final Cost
+                HStack(spacing: 40) {
+                    // 1. Costo Iniziale Totale
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Total Initial")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.secondary)
 
-                    Text(String(format: "$%.2f", initialCost))
-                        .font(.system(size: 40, weight: .bold)) // Molto grande e chiaro
-                        .foregroundStyle(.primary)
+                        Text(String(format: "$%.2f", initialCost))
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.primary)
+                    }
+
+                    Divider()
+                        .frame(height: 40)
+
+                    // 2. Costo Finale Totale
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Total Final")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.secondary)
+
+                        Text(String(format: "$%.2f", finalCost))
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            // Colore dinamico: Verde se risparmio, Rosso se spesa extra
+                            .foregroundStyle(totalDifference >= 0 ? .green : .red)
+                    }
                 }
 
                 Divider()
 
-                // 2. Risparmio o Spesa Extra
-                VStack(spacing: 8) {
-                    if totalDifference > 0 {
-                        Text("Total Saved")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                        Text(String(format: "-$%.2f", totalDifference))
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundStyle(.green)
-                    } else if totalDifference < 0 {
-                        Text("Extra Cost")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                        Text(String(format: "+$%.2f", abs(totalDifference)))
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundStyle(.red)
-                    } else {
-                        Text("No Cost Change")
-                            .font(.title2)
-                            .foregroundStyle(.secondary)
-                    }
+                // 3. Testo di Riepilogo (Saved / Extra)
+                if totalDifference > 0 {
+                    Text("You saved a total of \(String(format: "$%.2f", totalDifference))!")
+                        .font(.headline)
+                        .foregroundStyle(.green)
+                } else if totalDifference < 0 {
+                    Text("You spent \(String(format: "$%.2f", abs(totalDifference))) extra.")
+                        .font(.headline)
+                        .foregroundStyle(.red)
+                } else {
+                    Text("Total cost remained the same.")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
                 }
             }
             .padding(30)
